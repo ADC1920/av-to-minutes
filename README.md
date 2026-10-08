@@ -1,4 +1,4 @@
-# av2minutes
+# av-to-minutes
 
 **音视频 → 转写文稿 / 会议纪要 全自动管线**：一条命令跑完「拆轨 → 人声分离 → 说话人分离 → 转写 → 规范 docx 排版」。识别引擎可走云端（免本地显存）或本地离线模型；成稿平铺直出，过程件不留。
 
@@ -39,19 +39,19 @@ pip install dashscope
 
 ```bash
 # 会议录音 → 会议原文（带时间戳+说话人标签，供提炼纪要）
-python av2minutes.py 会议录音.m4a --meeting --asr-engine cloud
+python av_to_minutes.py 会议录音.m4a --meeting --asr-engine cloud
 
 # 普通音视频 → 转写文稿（跳过说话人分离更快）
-python av2minutes.py 我的视频.mp4 --asr-engine cloud --no-diarize
+python av_to_minutes.py 我的视频.mp4 --asr-engine cloud --no-diarize
 
 # 平铺输出：成稿直接放素材同目录，过程件全清
-python av2minutes.py 会议录音.m4a --meeting --asr-engine cloud --flat
+python av_to_minutes.py 会议录音.m4a --meeting --asr-engine cloud --flat
 ```
 
 Windows 下可用随附启动器（自动定位目录、注入 venv PATH、默认追加 `--flat`）：
 
 ```cmd
-av2minutes.cmd "会议录音.m4a" --meeting --asr-engine cloud
+av_to_minutes.cmd "会议录音.m4a" --meeting --asr-engine cloud
 ```
 
 ## 输出说明
@@ -93,7 +93,7 @@ replace_dict.txt    # 每行「错=>对」：确认过的错写映射（识别�
 | `--split-channels` | 双人分声道素材按声道分说话人 |
 | `--force` | 重跑已处理过的素材 |
 
-完整参数见 `python av2minutes.py --help`。
+完整参数见 `python av_to_minutes.py --help`。
 
 ## 与会议纪要技能联动
 
@@ -105,9 +105,9 @@ replace_dict.txt    # 每行「错=>对」：确认过的错写映射（识别�
 ## 目录结构
 
 ```text
-av2minutes/
-├── av2minutes.py                 # 全流程主脚本
-├── av2minutes.cmd                # Windows 启动器（自动注入 PATH，默认 --flat）
+av-to-minutes/
+├── av_to_minutes.py              # 全流程主脚本
+├── av_to_minutes.cmd             # Windows 启动器（自动注入 PATH，默认 --flat）
 ├── requirements.txt
 ├── hotwords.example.txt          # 热词表示例（复制为 hotwords.txt 使用）
 ├── replace_dict.example.txt      # 纠错词典示例（复制为 replace_dict.txt 使用）

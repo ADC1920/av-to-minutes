@@ -19,7 +19,7 @@
   会议原文-<名>.md / .docx      会议原文（--meeting；正式纪要由 AI 从原文提炼为「会议纪要-<名>」）
 
 用法：
-  python av2minutes.py <视频/音频文件或文件夹> [-o 输出目录] [--force] [--no-asr] [--meeting]
+  python av_to_minutes.py <视频/音频文件或文件夹> [-o 输出目录] [--force] [--no-asr] [--meeting]
 
 常用参数：
   --meeting               产出带说话人与时间戳的会议原文（正式纪要由会话内 AI 提炼）

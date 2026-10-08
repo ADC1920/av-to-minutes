@@ -5,13 +5,13 @@ description: "音视频转文字（本机部署运行，识别引擎走云端）
 
 # FunASR / Qwen3-ASR 语音转写（本机云端识别版）
 
-> **本副本为随仓库分发版**：工具链＝`本仓库根目录\`（管线仓库——根脚本 `av2minutes.py` 跑全流程；本转写引擎脚本在其 `skills/funasr-transcribe/scripts/` 下）。
+> **本副本为随仓库分发版**：工具链＝`本仓库根目录\`（管线仓库——根脚本 `av_to_minutes.py` 跑全流程；本转写引擎脚本在其 `skills/funasr-transcribe/scripts/` 下）。
 > **识别引擎方针：走云端**（`--engine cloud` / 管线 `--asr-engine cloud`，阿里云百炼，免本地大模型加载与显存占用）；人声分离（Demucs）、说话人分离（VAD/声纹聚类）、字幕对齐等本地组件照常在本机运行（RTX 4060 8GB）。
 > 密钥 DASHSCOPE_API_KEY 存于 HKCU\Environment（`load_dashscope_key` 自动读取，绝不写进代码/对话）。
 
 把录音、视频转成文字的工具箱，识别引擎走云端。Python 环境＝管线仓库 venv（`本仓库根目录\.venv`，Python 3.12，含 torch cu128 + funasr + demucs + pyannote + dashscope）；模型缓存 `%USERPROFILE%\.cache\modelscope\models\`。
 
-> **命令约定**：**首选走启动器** `本仓库根目录\av2minutes.cmd <素材> [参数…]`（自动注入 PATH ＋ 默认追加 `--flat` 平铺输出）。下文 `<PY>` ＝ `本仓库根目录\.venv\Scripts\python.exe`（本机管线 venv；裸 `python` 指向系统 3.14 且无本项目依赖，勿用）；`<管线>` ＝ `本仓库根目录\av2minutes.py`；`<技能目录>` ＝ 本 SKILL.md 所在目录。手动直跑时记得自行带上 `--flat`。
+> **命令约定**：**首选走启动器** `本仓库根目录\av_to_minutes.cmd <素材> [参数…]`（自动注入 PATH ＋ 默认追加 `--flat` 平铺输出）。下文 `<PY>` ＝ `本仓库根目录\.venv\Scripts\python.exe`（本机管线 venv；裸 `python` 指向系统 3.14 且无本项目依赖，勿用）；`<管线>` ＝ `本仓库根目录\av_to_minutes.py`；`<技能目录>` ＝ 本 SKILL.md 所在目录。手动直跑时记得自行带上 `--flat`。
 
 ## 快速决策（按需求选脚本）
 
@@ -31,7 +31,7 @@ description: "音视频转文字（本机部署运行，识别引擎走云端）
 
 `<技能目录>` = 本 SKILL.md 所在目录；`<PY>` 与 `<管线>` 见文首「命令约定」。
 
-**交付形态（2026-10-08 用户明确，最终口径）**：转写任务**只留成稿、且与素材同目录平铺**——会议场景出「会议原文 docx」（＝转写原文，供 meeting-notes-expert 提炼「会议纪要 docx」）、普通场景出「转写文稿 docx」（＝普通文稿）。**素材目录最终只有「原始音视频 + 成稿 docx」**：不建 separated_out 子目录，不留 md 提炼底稿、.demucs_model 标记、三份中间 wav 与转写缓存 json、拆轨产物。落地＝跑管线**默认带 `--flat`**（启动器 av2minutes.cmd 已内建自动追加；手动直跑时自行加上）。幂等说明：成稿 docx 在素材目录即视为已完成，重跑自动跳过、不重复转写；确需重跑用 `--force`；确需保留中间件排查时去掉 `--flat`。
+**交付形态（2026-10-08 用户明确，最终口径）**：转写任务**只留成稿、且与素材同目录平铺**——会议场景出「会议原文 docx」（＝转写原文，供 meeting-notes-expert 提炼「会议纪要 docx」）、普通场景出「转写文稿 docx」（＝普通文稿）。**素材目录最终只有「原始音视频 + 成稿 docx」**：不建 separated_out 子目录，不留 md 提炼底稿、.demucs_model 标记、三份中间 wav 与转写缓存 json、拆轨产物。落地＝跑管线**默认带 `--flat`**（启动器 av_to_minutes.cmd 已内建自动追加；手动直跑时自行加上）。幂等说明：成稿 docx 在素材目录即视为已完成，重跑自动跳过、不重复转写；确需重跑用 `--force`；确需保留中间件排查时去掉 `--flat`。
 
 ## 主力脚本 qwen_asr.py（双引擎，Qwen3-ASR 默认 / FireRedASR2-AED 可选）
 
@@ -144,7 +144,7 @@ AED 输出中文乱码**；噪声音频 AED 明显更稳。速度（稳态）AED
 
 模型清单与下载 ID、fa-zh 强制对齐 / 专名纠错 / FireRedVAD / ZipEnhancer 的接口与实测数据、ct-punc / emotion2vec 调用代码、环境安装与修复步骤、完整踩坑记录 → 读 **references/advanced.md**（按需加载，不预读）。
 
-## 全自动链路：本机管线 av2minutes.py（视频/音频 → 文稿 → docx）
+## 全自动链路：本机管线 av_to_minutes.py（视频/音频 → 文稿 → docx）
 
 一条命令跑完：FFmpeg 拆轨（无损 copy）→ Demucs 人声/背景音分离 → agate 噪声门 → qwen_asr 恒走 `--diarize` 转写 → 组稿 → article-format 规范 docx。视频与音频通用，逐环节幂等可续跑。
 
@@ -213,7 +213,7 @@ AED 输出中文乱码**；噪声音频 AED 明显更稳。速度（稳态）AED
 
 部署说明（2026-10-08）：管线仓库 `本仓库根目录\`（源自上游 `ADC1920/av-to-transcript-and-minutes`，MIT 许可）——
 
-- 根脚本 `av2minutes.py`：全流程入口（拆轨 → Demucs 人声分离 → 说话人分离转写 → 组稿 → 规范 docx）。
+- 根脚本 `av_to_minutes.py`：全流程入口（拆轨 → Demucs 人声分离 → 说话人分离转写 → 组稿 → 规范 docx）。
 - `skills/funasr-transcribe/scripts/`：转写引擎脚本（`qwen_asr.py` 双引擎含 cloud、`transcribe.py`、`diarize.py`、`itn_zh.py` 与各测试）。
 - `skills/meeting-notes-expert/`：本仓库附带的旧版副本（**落后于本机权威技能** `~/.agents/skills/meeting-notes-expert`，一律以本机权威版为准，勿用仓库副本覆盖）。
 - 本技能 `~/.agents/skills/funasr-transcribe/scripts/` 为管线仓库脚本的同步副本；改动后两处同改，避免漂移。
