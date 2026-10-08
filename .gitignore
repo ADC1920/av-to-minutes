@@ -1,0 +1,29 @@
+# ---- 运行产物与中间件 ----
+separated_out/
+_demucs_tmp/
+run.log
+*.wav
+*.srt
+
+# ---- 本机部署件（不入库）----
+.venv/
+_deploy-*/
+_install.log
+_install_deps.sh
+_本机部署说明.md
+_config_key.py
+
+# ---- 真实词表（含业务信息，不入库；用 .example 模板）----
+hotwords.txt
+replace_dict.txt
+
+# ---- 备份与缓存 ----
+*.bak-*
+__pycache__/
+*.pyc
+
+# ---- 素材文件（防误入库）----
+*.m4a
+*.mp3
+*.mp4
+*.mkv
