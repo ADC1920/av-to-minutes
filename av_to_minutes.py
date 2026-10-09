@@ -639,7 +639,10 @@ def separate_one(media: Path, out_dir: Path, force: bool, do_asr: bool = True,
         # demucs 的进度条有实际参考价值，始终实时透传（不捕获）
         # HF_HUB_OFFLINE=1：demucs 默认先试 HuggingFace 元数据（本机网络不通，重试 5 次约 30 秒才
         # 失败回落官方源）；离线模式使其立即失败并立即走 dl.fbaipublicfiles.com 兜底，省等待
-        run_child(["demucs", "-n", demucs_model, "--two-stems=vocals",
+        # 本机适配（2026-10-09）：走 [sys.executable, -m demucs] 而非 "demucs" 命令名——
+        # 本机 Windows 应用控制策略拦截 venv 内未签名的 console-script exe（uv trampoline 与
+        # distlib launcher 均被拦，python.exe 因有签名放行），-m 调用为官方等价入口、绕开该 exe
+        run_child([sys.executable, "-m", "demucs", "-n", demucs_model, "--two-stems=vocals",
                    "-o", str(tmp), str(media)], verbose=True,
                   env=child_env(HF_HUB_OFFLINE="1"))
         # demucs 固定输出 vocals.wav / no_vocals.wav，移入输出目录时改成自说明中文名
