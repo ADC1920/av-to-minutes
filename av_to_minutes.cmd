@@ -1,4 +1,7 @@
 @echo off
+rem UTF-8 控制台 + Python 输出锁 UTF-8：主进程日志中文在 Git Bash/管道下不再乱码
+chcp 65001 >nul
+set "PYTHONUTF8=1"
 rem av-to-minutes 管线启动器
 rem 用法: av_to_minutes.cmd <音视频文件或目录> [--meeting] [--asr-engine cloud] [...]
 rem 自动定位脚本所在目录并注入 venv\Scripts 到 PATH（demucs 等可执行文件依赖）。
