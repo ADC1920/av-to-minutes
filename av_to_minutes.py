@@ -472,12 +472,18 @@ def transcribe_and_write_article(stem_dir: Path, stem: str, force: bool,
     vocals = stem_dir / "人声.wav"
     # demucs 在静音段输出低电平伪影（非真静音），VAD 能量门限会失效切不出段——
     # 先过噪声门：低于 -40dB 归零、人声直通，恢复段间真静音（实测 VAD 1 段 → 2 段）
+    # 同步降采样为 16k mono：message 通道按 sample_rate=16000 声明，输入与声明一致，
+    # 上传字节约为 44.1k 立体声的 1/5.5；pyannote 按 16k 训练不受影响。
+    # 例外：--split-channels 要从本文件 channelsplit 左右声道，保持 44.1k 立体声。
     vocals_asr = stem_dir / "人声_转写用.wav"
     if force or not vocals_asr.exists():
-        print(f"[噪声门] {stem}：agate 清理分离伪影")
+        keep_stereo = bool(opts.get("split_channels"))
+        print(f"[噪声门] {stem}：agate 清理分离伪影"
+              + ("" if keep_stereo else "，输出 16k mono"))
+        out_args = ["-ac", "2", "-ar", "44100"] if keep_stereo else ["-ac", "1", "-ar", "16000"]
         run_child(["ffmpeg", "-y", "-i", str(vocals), "-af",
                    "agate=threshold=-40dB:ratio=99:attack=2:release=100",
-                   str(vocals_asr)], env=child_env())
+                   *out_args, str(vocals_asr)], env=child_env())
     print(f"[转写] {stem}：说话人分离转写中（首次较慢；命中缓存直接复用）")
     # 降噪评估：粗估信噪比并给建议。不自动开降噪——实测白噪声场景无收益甚至更差，
     # 只在真实低信噪素材上才值得试，所以给提示而不是替用户决定。
